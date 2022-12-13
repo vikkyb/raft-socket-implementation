@@ -323,7 +323,7 @@ class Server(threading.Thread):
 node_server = Server(local_name_index)
 node_server.start_listening()
 print("This is node", local_name, "with address", local_ip_address, "and index", local_name_index)
-_ = input("Only continue once all nodes are running")
+blank = input("Only continue once all nodes are running")
 node_server.start_senders()
 node_server.start()
 time.sleep(10)
