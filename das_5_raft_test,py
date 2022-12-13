@@ -8,11 +8,27 @@ import argparse
 
 LOCALHOST = '127.0.0.1'
 BUFFER_SIZE = 1024
-
+DAS5HOST = "10.141.0."
 np.random.seed(1234)
-n_nodes = 6
 candidate_waiting_scale = 3
+
+
+parser = argparse.ArgumentParser(description="Start RAFT client")
+parser.add_argument("reserved_nodes")
+
+args = parser.parse_args()
+
+reserved_nodes = args.reserved_nodes.split()
+print(reserved_nodes)
+
+n_nodes = len(reserved_nodes)
 ports = np.random.choice(np.arange(8400, 8800), size=(n_nodes, n_nodes), replace=False)
+
+local_name = socket.gethostname()
+local_ip_address = socket.gethostbyname(local_name)
+
+local_name_index = reserved_nodes.index(local_name)
+
 # ports = np.random.randint(8400, 8800, (n_nodes, n_nodes))
 # ports are accessed by [sender, receiver]
 
@@ -46,6 +62,7 @@ class Receiver(threading.Thread):
                 if received_message in shutdown_commands:
                     connection.close()
                     self.running = False
+                    self.server.running = False
                     break
                 received_message = None
 
@@ -95,9 +112,11 @@ class Server(threading.Thread):
         self.senders = {}
         self.receivers = {}
         self.other_servers = []
+        
         for i in range(n_nodes):
             if i != self.server_id:
-                self.senders[i] = Sender(self, i, ports[self.server_id, i])
+                ip_addition = str(int(reserved_nodes[i][-2:]))
+                self.senders[i] = Sender(self, i, ports[self.server_id, i], receiver_ip=str(DAS5HOST + ip_addition))
                 self.receivers[i] = Receiver(self, i, ports[i, self.server_id])
                 self.other_servers.append(i)
         # print(F"I am {self.server_id} and the others are {self.other_servers}")
@@ -148,7 +167,7 @@ class Server(threading.Thread):
                     self.connected_servers.append(send_id)
 
         # Fully connected
-        # print(self.server_id, "fully connected")
+        print(self.server_id, "fully connected")
         self.state = "waiting"
         self.connected = True
 
@@ -301,34 +320,42 @@ class Server(threading.Thread):
             self.receivers[i].running = False
             self.senders[i].running = False
 
-    
+node_server = Server(local_name_index)
+node_server.start_listening()
+print(F"This is node {local_name} with address {local_ip_address} and index {local_name_index}")
+_ = input("Only continue once all nodes are running")
+node_server.start_senders()
+node_server.start()
+time.sleep(10)
+print(F"Node {local_name} has leader {node_server.leader}")
+print("Closing process in 5 seconds")
 
-print(ports)
+# print(ports)
 
-servers = []
-for s in range(n_nodes):
-    servers.append(Server(s))
+# servers = []
+# for s in range(n_nodes):
+#     servers.append(Server(s))
 
-for s in servers:
-    s.start_listening()
+# for s in servers:
+#     s.start_listening()
 
-for s in servers:
-    s.start_senders()
+# for s in servers:
+#     s.start_senders()
 
-for s in servers:
-    s.start()
+# for s in servers:
+#     s.start()
 
-# time.sleep(5)
-# servers[0].broadcast("Hello, I am server 0")
-# time.sleep(5)
-# servers[0].broadcast("Hello again, still server 0")
-# time.sleep(5)
+# # time.sleep(5)
+# # servers[0].broadcast("Hello, I am server 0")
+# # time.sleep(5)
+# # servers[0].broadcast("Hello again, still server 0")
+# # time.sleep(5)
 
-time.sleep(40)
-print("\n\n")
-for s in servers:
-    print(s.server_id, "logs", s.log)
-    print(s.server_id, "has leader", s.leader, "\n")
-    s.close_connections()
+time.sleep(5)
+# print("\n\n")
+# for s in servers:
+#     print(s.server_id, "logs", s.log)
+#     print(s.server_id, "has leader", s.leader, "\n")
+#     s.close_connections()
 
 os._exit(0)
