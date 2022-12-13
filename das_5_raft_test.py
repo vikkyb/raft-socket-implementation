@@ -230,7 +230,7 @@ class Server(threading.Thread):
             "y" : 1,
             "n" : 0
         }
-        self.broadcast(F"vote for me as leader {self.term}")
+        self.broadcast("vote for me as leader " + str(self.term))
         while self.state == "candidate":
             if len(self.received_messages) != 0:
                 msg = self.received_messages.pop(0)
@@ -322,12 +322,12 @@ class Server(threading.Thread):
 
 node_server = Server(local_name_index)
 node_server.start_listening()
-print(F"This is node {local_name} with address {local_ip_address} and index {local_name_index}")
+print("This is node", local_name, "with address", local_ip_address, "and index", local_name_index)
 _ = input("Only continue once all nodes are running")
 node_server.start_senders()
 node_server.start()
 time.sleep(10)
-print(F"Node {local_name} has leader {node_server.leader}")
+print("Node", local_name, "has leader", node_server.leader)
 print("Closing process in 5 seconds")
 
 # print(ports)
