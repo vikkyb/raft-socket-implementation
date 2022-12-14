@@ -1,3 +1,5 @@
+# THIS SCRIPT ONLY WORKS WITH PYTHON 2.7.5!!!
+
 import socket
 import threading
 import numpy as np
@@ -47,7 +49,7 @@ class Receiver(threading.Thread):
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname) 
         # ip_address = LOCALHOST
-        print("Opening receiver on server", self.server.server_id, "with ip and port", ip_address, self.port)
+        print("\nOpening receiver on server", self.server.server_id, "with ip and port", ip_address, self.port)
         receiver_socket.bind((ip_address, self.port))
         # print(F"Receiver from {self.sender_node_name} to {self.server.server_id} via {ip_address}:{self.port}")
 
@@ -87,7 +89,7 @@ class Sender(threading.Thread):
         while self.running:
             if self.message2send != None:
                 # print("Sending from", self.server.server_id, "to", self.receiver_node_name,"message", self.message2send)
-                sender_socket.sendall(bytes(self.message2send, "utf-8"))
+                sender_socket.sendall(bytes(self.message2send.encode("utf-8")))
                 if self.message2send in shutdown_commands:
                     self.running = False
                     break
