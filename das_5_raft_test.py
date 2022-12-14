@@ -1,5 +1,6 @@
 # THIS SCRIPT ONLY WORKS WITH PYTHON 2.7.5!!!
-
+# The code was originally written for python 3.7 but the DAS-5 server only has a python3 version that does not include numpy and I need numpy
+# Some print statements are therefore a bit weird or are printed as weird tuples, sorry for that! :(
 import socket
 import threading
 import numpy as np
@@ -10,18 +11,23 @@ import argparse
 
 LOCALHOST = '127.0.0.1'
 BUFFER_SIZE = 1024
-DAS5HOST = "10.141.0."
-np.random.seed(1234)
-candidate_waiting_scale = 3
 
+# DAS-5 local address
+DAS5HOST = "10.141.0."
+
+# Setting the seed ensures that the port matrix is always identical
+np.random.seed(1234)
+
+# Scale beteen 0 and this for the waiting time before one becomes a candidate
+candidate_waiting_scale = 3
 
 parser = argparse.ArgumentParser(description="Start RAFT client")
 parser.add_argument("reserved_nodes")
 
 args = parser.parse_args()
 
+# Identify reserved nodes
 reserved_nodes = args.reserved_nodes.split()
-print(reserved_nodes)
 
 n_nodes = len(reserved_nodes)
 ports = np.random.choice(np.arange(8400, 8800), size=(n_nodes, n_nodes), replace=False)
@@ -31,9 +37,7 @@ local_ip_address = socket.gethostbyname(local_name)
 
 local_name_index = reserved_nodes.index(local_name)
 
-# ports = np.random.randint(8400, 8800, (n_nodes, n_nodes))
-# ports are accessed by [sender, receiver]
-
+# If one of these commands is send/received, shutdown the server
 shutdown_commands = ["cc", "quit", "close"]
 
 class Receiver(threading.Thread):
@@ -48,7 +52,7 @@ class Receiver(threading.Thread):
         receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname) 
-        # ip_address = LOCALHOST
+
         print("\nOpening receiver on server", self.server.server_id, "with ip and port", ip_address, self.port)
         receiver_socket.bind((ip_address, self.port))
         # print(F"Receiver from {self.sender_node_name} to {self.server.server_id} via {ip_address}:{self.port}")
@@ -333,35 +337,10 @@ blank = raw_input("Only continue once all nodes are running")
 node_server.start_senders()
 node_server.start()
 time.sleep(10)
-print("Node", local_name, "has leader", node_server.leader)
+print("Node", local_name, "has leader", node_server.leader, "and voted term", node_server.voted_term, "and term", node_server.term)
 print("Closing process in 5 seconds")
 
-# print(ports)
-
-# servers = []
-# for s in range(n_nodes):
-#     servers.append(Server(s))
-
-# for s in servers:
-#     s.start_listening()
-
-# for s in servers:
-#     s.start_senders()
-
-# for s in servers:
-#     s.start()
-
-# # time.sleep(5)
-# # servers[0].broadcast("Hello, I am server 0")
-# # time.sleep(5)
-# # servers[0].broadcast("Hello again, still server 0")
-# # time.sleep(5)
 
 time.sleep(5)
-# print("\n\n")
-# for s in servers:
-#     print(s.server_id, "logs", s.log)
-#     print(s.server_id, "has leader", s.leader, "\n")
-#     s.close_connections()
 
 os._exit(0)
