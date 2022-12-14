@@ -44,9 +44,9 @@ class Receiver(threading.Thread):
 
     def run(self):
         receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # hostname = socket.gethostname()
-        # ip_address = socket.gethostbyname(hostname) 
-        ip_address = LOCALHOST
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname) 
+        # ip_address = LOCALHOST
         receiver_socket.bind((ip_address, self.port))
         # print(F"Receiver from {self.sender_node_name} to {self.server.server_id} via {ip_address}:{self.port}")
 
@@ -323,7 +323,7 @@ class Server(threading.Thread):
 node_server = Server(local_name_index)
 node_server.start_listening()
 print("This is node", local_name, "with address", local_ip_address, "and index", local_name_index)
-blank = input("Only continue once all nodes are running")
+blank = raw_input("Only continue once all nodes are running")
 node_server.start_senders()
 node_server.start()
 time.sleep(10)
