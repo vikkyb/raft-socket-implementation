@@ -192,7 +192,7 @@ class Server(threading.Thread):
                 msg = self.received_messages.pop(0)
                 msg, send_id = msg[0], msg[1]
                 if "vote for me as leader" in msg:
-                    split_msg = msg.split(sep=" ")
+                    split_msg = msg.split()
                     if self.voted_term < int(split_msg[-1]):
                         self.voted_term = int(split_msg[-1])
                         # Someone else is a candidate
@@ -216,7 +216,7 @@ class Server(threading.Thread):
                 msg = self.received_messages.pop(0)
                 msg, send_id = msg[0], msg[1]
                 if "vote for me as leader" in msg:
-                    split_msg = msg.split(sep=" ")
+                    split_msg = msg.split()
                     if self.voted_term < int(split_msg[-1]):
                         self.voted_term = int(split_msg[-1])
                         print(self.server_id, "voted for", send_id)
@@ -247,7 +247,7 @@ class Server(threading.Thread):
                     self.votes["n"] += 1
                 
                 elif "vote for me as leader" in msg:
-                    split_msg = msg.split(sep=" ")
+                    split_msg = msg.split()
                     if self.term < int(split_msg[-1]):
                         self.voted_term = int(split_msg[-1])
                         print(self.server_id, "voted for", send_id)
