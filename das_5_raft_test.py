@@ -53,7 +53,7 @@ class Receiver(threading.Thread):
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname) 
 
-        print("\nOpening receiver on server", self.server.server_id, "with ip and port", ip_address, self.port)
+        # print("\nOpening receiver on server", self.server.server_id, "with ip and port", ip_address, self.port)
         receiver_socket.bind((ip_address, self.port))
         # print(F"Receiver from {self.sender_node_name} to {self.server.server_id} via {ip_address}:{self.port}")
 
@@ -86,7 +86,7 @@ class Sender(threading.Thread):
         
     def run(self):
         sender_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print("Opening sender on server", self.server.server_id, "to ip and port", self.receiver_ip, self.receiver_port)
+        # print("Opening sender on server", self.server.server_id, "to ip and port", self.receiver_ip, self.receiver_port)
 
         # print(F"Sender from {self.server.server_id} to {self.receiver_node_name} via {self.receiver_ip}:{self.receiver_port}")
         sender_socket.connect((self.receiver_ip, self.receiver_port))
