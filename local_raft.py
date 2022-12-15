@@ -13,7 +13,7 @@ BUFFER_SIZE = 1024
 np.random.seed(1234)
 
 # The number of nodes to simulate
-n_nodes = 6
+n_nodes = 3
 
 # Scale beteen 0 and this for the waiting time before one becomes a candidate, a scale of 3 means a waiting time of maximum 3 seconds.
 candidate_waiting_scale = 3
