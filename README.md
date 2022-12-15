@@ -8,7 +8,7 @@ Running the code on a local system is quite easy, the _local_raft.py_ file can b
 ## DAS-5
 Make sure that you can run the code on all nodes! After reservering your nodes, you should ssh into them on separate terminals and call the script as following
 ```console
-foo@bar:~$ python das_5_raft_test.py "node111 node112 node113"
+foo@bar:~$ python das_5_raft.py "node111 node112 node113"
 ```
 Where you change the nodes mentioned in the string with the nodes you reserved. Once all nodes are running the file, it will have opened all the receiving channels. Only after you run the file on all nodes can you continue (by pressing enter in each terminal) and open the sending channels. Once all nodes have established connection, leader election automatically begins.
 
