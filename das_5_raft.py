@@ -31,6 +31,7 @@ args = parser.parse_args()
 reserved_nodes = args.reserved_nodes.split()
 
 # Create ports matrix, this is deterministic and ensures that senders/receivers always know what port to choose
+# Ports are accessed by index [sender, receiver]
 n_nodes = len(reserved_nodes)
 ports = np.random.choice(np.arange(8400, 8800), size=(n_nodes, n_nodes), replace=False)
 

@@ -5,19 +5,31 @@ import time
 import os
 import random
 
+# The IP used in connection
 LOCALHOST = '127.0.0.1'
 BUFFER_SIZE = 1024
 
+# Setting the seed ensures that the port matrix is always identical
 np.random.seed(1234)
+
+# The number of nodes to simulate
 n_nodes = 6
+
+# Scale beteen 0 and this for the waiting time before one becomes a candidate, a scale of 3 means a waiting time of maximum 3 seconds.
 candidate_waiting_scale = 3
 
-# ports are accessed by index [sender, receiver]
+# Create ports matrix, this is deterministic and ensures that senders/receivers always know what port to choose
+# Ports are accessed by index [sender, receiver]
 ports = np.random.choice(np.arange(8400, 8800), size=(n_nodes, n_nodes), replace=False)
 
+# If one of these commands is send/received, shutdown the server
 shutdown_commands = ["cc", "quit", "close"]
 
 class Receiver(threading.Thread):
+    """
+    A receiver is one of two parts in the communication link between nodes. A receiver receives messages from only one specified sender
+    and passes it on to the parent server (or node). Per other server, a receiver is created dedicated to only that other server.
+    """
     def __init__(self, server, sender_node_name, port):
         threading.Thread.__init__(self)
         self.server = server
@@ -27,11 +39,8 @@ class Receiver(threading.Thread):
 
     def run(self):
         receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # hostname = socket.gethostname()
-        # ip_address = socket.gethostbyname(hostname) 
         ip_address = LOCALHOST
         receiver_socket.bind((ip_address, self.port))
-        # print(F"Receiver from {self.sender_node_name} to {self.server.server_id} via {ip_address}:{self.port}")
 
         receiver_socket.listen(10)
         connection, _ = receiver_socket.accept()
@@ -39,7 +48,6 @@ class Receiver(threading.Thread):
             received_message =  connection.recv(BUFFER_SIZE)
             if received_message:
                 received_message = received_message.decode("utf-8")
-                # print("Message received", received_message)
                 self.server.received_messages.append((received_message, self.sender_node_name))
                 self.server.log.append((received_message, self.sender_node_name))
                 if received_message in shutdown_commands:
@@ -99,18 +107,13 @@ class Server(threading.Thread):
                 self.senders[i] = Sender(self, i, ports[self.server_id, i])
                 self.receivers[i] = Receiver(self, i, ports[i, self.server_id])
                 self.other_servers.append(i)
-        # print(F"I am {self.server_id} and the others are {self.other_servers}")
 
     def run(self):
         while self.running:
             if not self.connected:
                 self.connecting_run()
-                # print(self.server_id, "fully connected", self.state, self.connected_servers)
-                # Create connections
-                # at some point fully connected and become waiting
 
             elif self.state == "waiting":
-                # Wait until deadline is passed
                 self.waiting_run()
 
             elif self.state == "voted":
@@ -127,11 +130,7 @@ class Server(threading.Thread):
 
             
             else:
-                # if len(self.received_messages) != 0:
-                #     msg = self.received_messages.pop(0)
-                #     print("received", msg, "on server", self.server_id)
-                #     if msg[0] in shutdown_commands:
-                #         self.running = False
+                # This should never happen
                 break
 
     def connecting_run(self):
@@ -147,10 +146,8 @@ class Server(threading.Thread):
                     self.connected_servers.append(send_id)
 
         # Fully connected
-        # print(self.server_id, "fully connected")
         self.state = "waiting"
         self.connected = True
-
 
     def waiting_run(self):
         self.term = max(self.term, self.voted_term)
@@ -300,29 +297,27 @@ class Server(threading.Thread):
             self.receivers[i].running = False
             self.senders[i].running = False
 
-    
-
+# Print port matrix
 print(ports)
 
 servers = []
+# Create the different servers
 for s in range(n_nodes):
     servers.append(Server(s))
 
+# Open receiver channels
 for s in servers:
     s.start_listening()
 
+# Open sender channels
 for s in servers:
     s.start_senders()
 
+# Start the internal servers' logic
 for s in servers:
     s.start()
 
-# time.sleep(5)
-# servers[0].broadcast("Hello, I am server 0")
-# time.sleep(5)
-# servers[0].broadcast("Hello again, still server 0")
-# time.sleep(5)
-
+# Run wait for 40 seconds before getting results
 time.sleep(40)
 print("\n\n")
 for s in servers:
@@ -330,4 +325,5 @@ for s in servers:
     print(s.server_id, "has leader", s.leader, "\n")
     s.close_connections()
 
+# Force close the threads
 os._exit(0)
