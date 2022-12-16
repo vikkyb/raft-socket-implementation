@@ -1,5 +1,5 @@
 # A Python RAFT leader election implementation using sockets
-This repository contains the code used for the second assignment of Distributed Data Processing Systems and cannot be used for any other purpose. RAFT is a consensus algorithm that elects a leader to enforce consensus. The specific part of leader election is implemented for the assignment. There are two main files, one can be used to run the election on a local system (which can be slow but good for testing purposes) and a file used for running the code on the DAS-5 system.
+This repository contains the code used for the second assignment of Distributed Data Processing Systems and cannot be used for any other purpose. RAFT is a consensus algorithm that elects a leader to enforce consensus. The specific part of leader election is implemented for the assignment. There are two main files, one can be used to run the election on a local system (which can be slow but good for testing purposes) and a file used for running the code on the DAS-5 system. The code should support up to 20 nodes (in theory), but I have not been able to verify this number by testing it. For larger numbers of nodes, the way ports are selected should be changed.
 
 # How to run the code
 ## Local
